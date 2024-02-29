@@ -18,6 +18,25 @@ local Terminal = t.Terminal
 ---@type fun(): Terminal[]
 local get_all = t.get_all
 
+
+--- @return number # Get all windows in the current tab page
+local function get_window_count()
+  return vim.fn.tabpagewinnr(vim.fn.tabpagenr(), "$")
+end
+
+--- @return number[] # The identifiers of all windows across all tabs
+local function get_windows()
+  local output = {}
+
+  for _, tab in ipairs(vim.api.nvim_list_tabpages()) do
+    for _, window in pairs(vim.api.nvim_tabpage_list_wins(tab)) do
+      table.insert(output, window)
+    end
+  end
+
+  return output
+end
+
 ---Return if a terminal has windows
 ---@param term table
 ---@return boolean, TerminalWindow[]
@@ -469,6 +488,51 @@ describe("ToggleTerm tests:", function()
 
       assert.is.truthy(winhighlight:match("NormalFloat:ToggleTerm" .. term.id .. "NormalFloat"))
       assert.is.truthy(winhighlight:match("FloatBorder:ToggleTerm" .. term.id .. "FloatBorder"))
+    end)
+  end)
+
+  describe("buffer terminals - ", function()
+    it("should load a terminal in the current buffer", function()
+      local before = get_window_count()
+      Terminal:new({direction="buffer"}):toggle()
+      local after = get_window_count()
+
+      assert.equal(vim.bo.buftype, "terminal")
+      assert.equal(before, after)
+    end)
+
+    it("should go to an alternate buffer when toggled", function()
+      vim.cmd.enew()
+      vim.cmd.file("some_buffer")
+      local alternate = vim.fn.bufnr()
+
+      local terminal = Terminal:new({direction="buffer"})
+      terminal:toggle()
+      assert.is_not_equal(alternate, vim.fn.bufnr())
+      terminal:toggle()
+      assert.equal(alternate, vim.fn.bufnr())
+    end)
+
+    it("should make a new buffer if there's no an alternate buffer", function()
+      local terminal = Terminal:new({direction="buffer"})
+      local terminal_buffer = vim.fn.bufnr()
+      terminal:toggle()
+
+      assert.is_not_equal(terminal_buffer, vim.fn.bufnr())
+    end)
+
+    it("should reuse an existing split", function()
+      vim.cmd.vsplit()
+      local windows = get_windows()
+
+      Terminal:new({direction="buffer"}):toggle()
+
+      local result = get_windows()
+      assert.equal(2, #windows)
+      assert.equal(2, #result)
+      assert.equal(windows[1], result[1])
+      assert.equal(windows[2], result[2])
+      assert.equal(vim.bo.buftype, "terminal")
     end)
   end)
 end)

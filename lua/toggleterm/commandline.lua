@@ -131,6 +131,7 @@ local term_exec_options = {
   ---@param typed_direction string
   direction = function(typed_direction)
     local directions = {
+      "buffer",
       "float",
       "horizontal",
       "tab",

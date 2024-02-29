@@ -11,6 +11,8 @@ Table of Contents                               *toggleterm-table-of-contents*
 
 MULTIPLE ORIENTATIONS ~
 
+- **Buffer**
+
 - **Float**
 
 - **Vertical**
@@ -178,7 +180,7 @@ what options are available. It is not written to be used as is.
       terminal_mappings = true, -- whether or not the open mapping applies in the opened terminals
       persist_size = true,
       persist_mode = true, -- if set to true (default) the previous terminal mode will be remembered
-      direction = 'vertical' | 'horizontal' | 'tab' | 'float',
+      direction = 'buffer' | 'vertical' | 'horizontal' | 'tab' | 'float',
       close_on_exit = true, -- close the terminal window when the process exits
        -- Change the default shell. Can be a string or a function returning a string
       shell = vim.o.shell,
@@ -538,6 +540,7 @@ OPEN MULTIPLE TERMINALS SIDE-BY-SIDE ~
 
   Direction    Supported
   ------------ -----------
+  buffer       
   vertical     
   horizontal   
   tab          

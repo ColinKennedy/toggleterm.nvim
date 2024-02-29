@@ -195,6 +195,7 @@ function Terminal:new(term)
   if id and terminals[id] then return terminals[id] end
   local conf = config.get()
   self.__index = self
+  term.previous_bufnr = vim.fn.bufnr()
   term.newline_chr = term.newline_chr or get_newline_chr()
   term.direction = term.direction or conf.direction
   term.id = id or next_id()
@@ -224,6 +225,8 @@ function Terminal:__add()
   if not terminals[self.id] then terminals[self.id] = self end
   return self
 end
+
+function Terminal:is_buffer() return self.direction == "buffer" end
 
 function Terminal:is_float() return self.direction == "float" and ui.is_float(self.window) end
 
@@ -454,6 +457,8 @@ local function opener(size, term)
     ui.open_tab(term)
   elseif direction == "float" then
     ui.open_float(term)
+  elseif direction == "buffer" then
+    ui.open_buffer(term)
   else
     error("Invalid terminal direction")
   end

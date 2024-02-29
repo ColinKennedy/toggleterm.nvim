@@ -31,6 +31,11 @@ local terminal_view = {
   focus_term_id = nil,
 }
 
+--- @return boolean
+local function is_last_window_in_tab()
+  return vim.fn.tabpagewinnr(vim.fn.tabpagenr(), '$') == 1
+end
+
 --- @class TerminalWindow
 --- @field term_id number ID for the terminal in the window
 --- @field window number window handle
@@ -304,6 +309,17 @@ function M._get_float_config(term, opening)
   return float_config
 end
 
+--- Make a new buffer and open a terminal at that location
+--- @param term Terminal
+function M.open_buffer(term)
+  vim.cmd("enew")
+
+  -- Set the new buffer to be wiped once it's replaced by the terminal buffer
+  vim.bo.bufhidden = "wipe"
+
+  create_term_buf_if_needed(term)
+end
+
 --- @param size number
 --- @param term Terminal
 function M.open_split(size, term)
@@ -342,6 +358,28 @@ local function close_tab(term)
     return utils.notify("You cannot close the last tab! This will exit neovim", "error")
   end
   api.nvim_win_close(term.window, true)
+end
+
+---Close the terminal and swap to the previous buffer, if it exists
+---@param term Terminal
+local function close_buffer(term)
+  if term.window and api.nvim_win_is_valid(term.window) then
+    if not is_last_window_in_tab() then
+      api.nvim_win_close(term.window, true)
+    else
+      if vim.fn.bufexists(term.previous_bufnr) == 1 then
+        vim.cmd.buffer(term.previous_bufnr)
+      else
+        vim.cmd.enew()
+      end
+    end
+  end
+
+  if origin_window and api.nvim_win_is_valid(origin_window) then
+    api.nvim_set_current_win(origin_window)
+  else
+    origin_window = nil
+  end
 end
 
 ---Close terminal window
@@ -389,6 +427,8 @@ function M.close(term)
     close_split(term)
   elseif term:is_tab() then
     close_tab(term)
+  elseif term:is_buffer() then
+    close_buffer(term)
   elseif term.window and api.nvim_win_is_valid(term.window) then
     api.nvim_win_close(term.window, true)
   end
