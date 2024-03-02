@@ -363,22 +363,23 @@ end
 ---Close the terminal and swap to the previous buffer, if it exists
 ---@param term Terminal
 local function close_buffer(term)
+  print('DEBUGPRINT[11]: ui.lua:366: term.window=' .. vim.inspect(term.window))
   if term.window and api.nvim_win_is_valid(term.window) then
+    print("is valid")
     if not is_last_window_in_tab() then
+      print("closing window")
       api.nvim_win_close(term.window, true)
     else
+      print("setting / making buffer")
+      print('DEBUGPRINT[12]: ui.lua:374: term.previous_bufnr=' .. vim.inspect(term.previous_bufnr))
       if vim.fn.bufexists(term.previous_bufnr) == 1 then
         vim.cmd.buffer(term.previous_bufnr)
       else
         vim.cmd.enew()
       end
     end
-  end
-
-  if origin_window and api.nvim_win_is_valid(origin_window) then
-    api.nvim_set_current_win(origin_window)
   else
-    origin_window = nil
+    print("NOT VALID")
   end
 end
 

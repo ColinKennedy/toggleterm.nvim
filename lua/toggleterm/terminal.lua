@@ -195,7 +195,11 @@ function Terminal:new(term)
   if id and terminals[id] then return terminals[id] end
   local conf = config.get()
   self.__index = self
-  term.previous_bufnr = vim.fn.bufnr()
+
+  if vim.bo.filetype ~= "toggleterm" then
+    term.previous_bufnr = vim.fn.bufnr()
+  end
+
   term.newline_chr = term.newline_chr or get_newline_chr()
   term.direction = term.direction or conf.direction
   term.id = id or next_id()

@@ -1,3 +1,17 @@
+Closes https://github.com/akinsho/toggleterm.nvim/issues/528
+
+Adds `:ToggleTerm direction=buffer`
+
+If a new toggleterm is made in a split, it replaces the split.
+
+If a new toggleterm is made in a full-screen buffer, it replaces the buffer.
+
+If toggling off a toggleterm...
+1. The alternate buffer before the toggleterm was made is shown
+2. and on the last window, toggling the toggleterm will open a new buffer instead
+
+
+
 <!-- panvimdoc-ignore-start -->
 
 <h1 align="center">
